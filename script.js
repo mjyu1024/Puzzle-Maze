@@ -1,7 +1,8 @@
 let canvas = document.querySelector("#play-ground");
 let ctx = canvas.getContext("2d");
+const statusElement = document.querySelector("#status");
 
-let playerX = 20;
+let playerX = 10;
 let playerY = 140;
 let speed = 10;
 let jump = 20;
@@ -24,6 +25,14 @@ const drawPlayer = (x, y) => {
     ctx.stroke();
 }
 
+const drawRoute = (x, y) => {
+    ctx.beginPath();
+    ctx.rect(x - 5, y - 5, 10, 10);
+    ctx.fillStyle = "black";
+    ctx.fill();
+    ctx.stroke();
+}
+
 const shapes = [];
 const drawSVG = (svg) => {
     return new Path2D(svg);
@@ -35,11 +44,16 @@ let shape = {
 };
 shapes.push(shape);
 
+const routes = [];
 
 const step = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < shapes.length; i++) {
         ctx.stroke(shapes[i].path);
+    }
+    for (let n = 0; n < routes.length; n++) {
+        let route = routes[n];
+        drawRoute(route.x, route.y);
     }
     drawPlayer(playerX, playerY);
     window.requestAnimationFrame(step);
@@ -64,6 +78,23 @@ const onKeydown = (event) => {
     }
 };
 
+const onTrack = (event) => {
+    for (let i = 0; i < shapes.length; i++) {
+        if (ctx.isPointInStroke(shapes[i].path, playerX, playerY)) {
+            statusElement.innerText = "Inside Shape";
+            let route = {
+                x: playerX,
+                y: playerY,
+            };
+            routes.push(route);
+        } else {
+            statusElement.innerText = "Outside Shape";
+        }
+
+    }
+};
+
 document.addEventListener("keydown", onKeydown);
+document.addEventListener("keydown", onTrack);
 window.requestAnimationFrame(step);
 
