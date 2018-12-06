@@ -1,6 +1,7 @@
 let canvas = document.querySelector("#play-ground");
 let ctx = canvas.getContext("2d");
-const statusElement = document.querySelector("#status");
+let statusElement = document.querySelector("#status");
+let display = document.querySelector("#time");
 
 // set up player & speed
 let playerX = 20;
@@ -8,7 +9,7 @@ let playerY = 140;
 let speed = 10;
 let jump = 20;
 
-// set up draw function
+// function that draw the player
 const drawPlayer = (x, y) => {
     ctx.beginPath();
     ctx.strokeStyle = "black";
@@ -29,13 +30,7 @@ const drawPlayer = (x, y) => {
     ctx.stroke();
 }
 
-const drawRoute = (x, y) => {
-    ctx.beginPath();
-    ctx.fillStyle = "black";
-    ctx.fillRect(x - 5, y - 5, 10, 10);
-
-}
-
+// function that draw the line
 const drawSVG = (svg) => {
     return new Path2D(svg);
 };
@@ -68,6 +63,14 @@ let hint0 = {
 };
 hints.push(hint0);
 
+// function that draw the route
+const drawRoute = (x, y) => {
+    ctx.beginPath();
+    ctx.fillStyle = "black";
+    ctx.fillRect(x - 5, y - 5, 10, 10);
+
+}
+
 const routes = [];
 let route0 = {
     x: playerX,
@@ -85,6 +88,7 @@ const addToRoutes = (route) => {
     }
 }
 
+// function that clean the canvas
 const step = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let m = 0; m < hints.length; m++) {
@@ -104,6 +108,7 @@ const step = () => {
     window.requestAnimationFrame(step);
 };
 
+// function to control moves
 const onKeydown = (event) => {
     let userPress = event.key;
     if (userPress === "ArrowUp") {
@@ -123,29 +128,62 @@ const onKeydown = (event) => {
     }
 };
 
+// function to check moves
 const onTrack = (event) => {
     for (let i = 0; i < shapes.length; i++) {
         if (ctx.isPointInStroke(shapes[i].path, playerX, playerY)) {
-            statusElement.innerText = "Inside Shape";
+            statusElement.innerText = "Right on track!";
             let route = {
                 x: playerX,
                 y: playerY,
             };
-            // for (let n = 0; n < routes.length; n++) {
-            //     console.log(route, routes[n]);
-            //     if (route.x !== routes[n].x || route.y !== routes[n].y) {
-            //         routes.push(route);
-            //     }
-            // }
             addToRoutes(route);
         } else {
-            statusElement.innerText = "Outside Shape";
+            statusElement.innerText = "Alert!";
         }
 
     }
 };
 
-document.addEventListener("keydown", onKeydown);
-document.addEventListener("keydown", onTrack);
-window.requestAnimationFrame(step);
+const startTimer = (duration, display) => {
+    var timer = duration, minutes, seconds;
+    setInterval(function () {
+        minutes = parseInt(timer / 60, 10)
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            timer = duration;
+        }
+    }, 1000);
+};
+
+alert("Let's start the game!");
+document.addEventListener("click", startTimer(5, display));
+
+if (display.textContent === 0 + ":" + 0) {
+    clearInterval(startTimer(5, display));
+    alert("Time's out! Let's startover.");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let m = 0; m < hints.length; m++) {
+        drawHint(hints[m].path);
+    }
+
+    for (let i = 0; i < shapes.length; i++) {
+        drawPath(shapes[i].path);
+    }
+
+    let playerX = 20;
+    let playerY = 140;
+    drawRoute(routes[0].x, routes[0].y);
+    drawPlayer(playerX, playerY);
+} else {
+    document.addEventListener("keydown", onKeydown);
+    document.addEventListener("keydown", onTrack);
+    window.requestAnimationFrame(step);
+}
 
