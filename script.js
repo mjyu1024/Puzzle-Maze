@@ -4,27 +4,31 @@ let statusElement = document.querySelector("#status");
 let display = document.querySelector("#time");
 
 // set up player & speed
-let playerX = 20;
-let playerY = 140;
-let speed = 10;
-let jump = 20;
+const player = {
+    x: 20,
+    y: 140,
+    speed: 10,
+    jump: 20,
+    duration: 120,
+}
+
 
 // function that draw the player
-const drawPlayer = (x, y) => {
+const drawPlayer = () => {
     ctx.beginPath();
     ctx.strokeStyle = "black";
     ctx.lineWidth = 1;
-    ctx.ellipse(x, y, 8, 10, 0, Math.PI, 2 * Math.PI);
-    ctx.lineTo(x + 4, y);
-    ctx.lineTo(x + 4, y + 10);
-    ctx.lineTo(x - 8, y + 10);
+    ctx.ellipse(player.x, player.y, 8, 10, 0, Math.PI, 2 * Math.PI);
+    ctx.lineTo(player.x + 4, player.y);
+    ctx.lineTo(player.x + 4, player.y + 10);
+    ctx.lineTo(player.x - 8, player.y + 10);
     ctx.closePath();
     ctx.fillStyle = "white";
     ctx.fill();
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.arc(x, y - 2, 2, 0, 2 * Math.PI);
+    ctx.arc(player.x, player.y - 2, 2, 0, 2 * Math.PI);
     ctx.fillStyle = "white";
     ctx.fill();
     ctx.stroke();
@@ -68,23 +72,33 @@ const drawRoute = (x, y) => {
     ctx.beginPath();
     ctx.fillStyle = "black";
     ctx.fillRect(x - 5, y - 5, 10, 10);
-
 }
 
-const routes = [];
+let routes = [];
 let route0 = {
-    x: playerX,
-    y: playerY,
+    x: player.x,
+    y: player.y,
 }
 routes.push(route0);
 
-const addToRoutes = (route) => {
+const addToRoutes = () => {
+    let route = {
+        x: player.x,
+        y: player.y,
+    };
     let found = routes.some(function (r) {
         return r.x === route.x && r.y === route.y;
     });
 
     if (!found) {
         routes.push(route);
+    }
+}
+
+const drawAllRoutes = () => {
+    for (let i = 0; i < routes.length; i++) {
+        let route = routes[i];
+        drawRoute(route.x, route.y);
     }
 }
 
@@ -99,12 +113,9 @@ const step = () => {
         drawPath(shapes[i].path);
     }
 
-    for (let n = 1; n < routes.length; n++) {
-        let route = routes[n];
-        drawRoute(route.x, route.y);
-    }
-    drawRoute(routes[0].x, routes[0].y);
-    drawPlayer(playerX, playerY);
+
+    drawAllRoutes()
+    drawPlayer();
     window.requestAnimationFrame(step);
 };
 
@@ -112,32 +123,28 @@ const step = () => {
 const onKeydown = (event) => {
     let userPress = event.key;
     if (userPress === "ArrowUp") {
-        playerY += -1 * speed;
+        player.y += -1 * player.speed;
     }
     if (userPress === "ArrowDown") {
-        playerY += 1 * speed;
+        player.y += 1 * player.speed;
     }
     if (userPress === "ArrowLeft") {
-        playerX += -1 * speed;
+        player.x += -1 * player.speed;
     }
     if (userPress === "ArrowRight") {
-        playerX += 1 * speed;
+        player.x += 1 * player.speed;
     }
     if (userPress === " ") {
-        playerX += 1 * jump;
+        player.x += 1 * player.jump;
     }
 };
 
 // function to check moves
 const onTrack = (event) => {
     for (let i = 0; i < shapes.length; i++) {
-        if (ctx.isPointInStroke(shapes[i].path, playerX, playerY)) {
+        if (ctx.isPointInStroke(shapes[i].path, player.x, player.y)) {
             statusElement.innerText = "Right on track!";
-            let route = {
-                x: playerX,
-                y: playerY,
-            };
-            addToRoutes(route);
+            addToRoutes();
         } else {
             statusElement.innerText = "Alert!";
         }
@@ -145,30 +152,8 @@ const onTrack = (event) => {
     }
 };
 
-const startTimer = (duration, display) => {
-    var timer = duration, minutes, seconds;
-    setInterval(function () {
-        minutes = parseInt(timer / 60, 10)
-        seconds = parseInt(timer % 60, 10);
-
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
-
-        display.textContent = minutes + ":" + seconds;
-
-        if (--timer < 0) {
-            timer = duration;
-        }
-    }, 1000);
-};
-
-alert("Let's start the game!");
-document.addEventListener("click", startTimer(5, display));
-
-if (display.textContent === 0 + ":" + 0) {
-    clearInterval(startTimer(5, display));
-    alert("Time's out! Let's startover.");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+// function to reset level
+const resetLevel = () => {
     for (let m = 0; m < hints.length; m++) {
         drawHint(hints[m].path);
     }
@@ -177,13 +162,45 @@ if (display.textContent === 0 + ":" + 0) {
         drawPath(shapes[i].path);
     }
 
-    let playerX = 20;
-    let playerY = 140;
-    drawRoute(routes[0].x, routes[0].y);
-    drawPlayer(playerX, playerY);
-} else {
-    document.addEventListener("keydown", onKeydown);
-    document.addEventListener("keydown", onTrack);
-    window.requestAnimationFrame(step);
-}
+    // Reset the player's position
+    player.x = 20;
+    player.y = 140;
+
+    // Reset the routes
+    routes = [];
+    routes.push(route0);
+
+    player.duration = 120;
+    startTimer(player.duration, display);
+};
+
+// function to start timer
+const startTimer = (duration, display) => {
+
+    let intervelID = setInterval(() => {
+
+        let minutes = parseInt(duration / 60, 10)
+        let seconds = parseInt(duration % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        duration = duration - 1;
+
+        if (duration < 0) {
+            clearInterval(intervelID);
+            alert("Time's out! Let's startover.");
+            resetLevel();
+        }
+    }, 1000);
+
+};
+
+alert("Let's start the game!");
+startTimer(player.duration, display);
+document.addEventListener("keydown", onKeydown);
+document.addEventListener("keydown", onTrack);
+window.requestAnimationFrame(step);
 
