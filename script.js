@@ -2,6 +2,7 @@ let canvas = document.querySelector("#play-ground");
 let ctx = canvas.getContext("2d");
 let statusElement = document.querySelector("#status");
 let display = document.querySelector("#time");
+let lifeCounter = document.querySelector("#life-counter");
 
 // set up player & speed
 const player = {
@@ -53,19 +54,15 @@ const drawPath = (shape) => {
     ctx.stroke(shape);
 };
 
-const shapes = [];
-let shape0 = {
+let shape = {
     name: "start",
     path: path0,
 };
-shapes.push(shape0);
 
-const hints = [];
-let hint0 = {
+let hint = {
     name: "game",
     path: hintPath0,
 };
-hints.push(hint0);
 
 // function that draw the route
 const drawRoute = (x, y) => {
@@ -105,13 +102,9 @@ const drawAllRoutes = () => {
 // function that clean the canvas
 const step = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (let m = 0; m < hints.length; m++) {
-        drawHint(hints[m].path);
-    }
 
-    for (let i = 0; i < shapes.length; i++) {
-        drawPath(shapes[i].path);
-    }
+    drawHint(hint.path);
+    drawPath(shape.path);
 
 
     drawAllRoutes()
@@ -141,26 +134,19 @@ const onKeydown = (event) => {
 
 // function to check moves
 const onTrack = (event) => {
-    for (let i = 0; i < shapes.length; i++) {
-        if (ctx.isPointInStroke(shapes[i].path, player.x, player.y)) {
-            statusElement.innerText = "Right on track!";
-            addToRoutes();
-        } else {
-            statusElement.innerText = "Alert!";
-        }
-
+    if (ctx.isPointInStroke(shape.path, player.x, player.y)) {
+        statusElement.innerText = "Right on track!";
+        addToRoutes();
+    } else {
+        statusElement.innerText = "Off the track!";
     }
+
 };
 
 // function to reset level
 const resetLevel = () => {
-    for (let m = 0; m < hints.length; m++) {
-        drawHint(hints[m].path);
-    }
-
-    for (let i = 0; i < shapes.length; i++) {
-        drawPath(shapes[i].path);
-    }
+    drawHint(hint.path);
+    drawPath(shape.path);
 
     // Reset the player's position
     player.x = 20;
@@ -174,10 +160,33 @@ const resetLevel = () => {
     startTimer(player.duration, display);
 };
 
+// set life counter
+let lifes = [
+    1,
+    2,
+    3,
+];
+
+const lifeTimer = () => {
+    if (lifes.length === 0) {
+        alert("You have run out of life!");
+        window.location.href = "index.html";
+    }
+
+    let n = lifes.length - 1;
+    console.log(lifes.length);
+    lifeCounter.textContent = lifes[n];
+};
+
+const lifeMinus = () => {
+    lifes.pop();
+};
+
 // function to start timer
 const startTimer = (duration, display) => {
 
     let intervelID = setInterval(() => {
+        lifeTimer();
 
         let minutes = parseInt(duration / 60, 10)
         let seconds = parseInt(duration % 60, 10);
@@ -193,6 +202,7 @@ const startTimer = (duration, display) => {
             clearInterval(intervelID);
             alert("Time's out! Let's startover.");
             resetLevel();
+            lifeMinus();
         }
     }, 1000);
 
@@ -203,4 +213,3 @@ startTimer(player.duration, display);
 document.addEventListener("keydown", onKeydown);
 document.addEventListener("keydown", onTrack);
 window.requestAnimationFrame(step);
-
