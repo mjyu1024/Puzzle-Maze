@@ -182,11 +182,19 @@ const lifeMinus = () => {
     lifes.pop();
 };
 
+// set win condition
+const win = () => {
+    if (routes.length === 146) {
+        alert("Congratulation! You pass the level!");
+        window.location.href = "index.html";
+    }
+}
+
 // function to start timer
 const startTimer = (duration, display) => {
-
     let intervelID = setInterval(() => {
         lifeTimer();
+        win();
 
         let minutes = parseInt(duration / 60, 10)
         let seconds = parseInt(duration % 60, 10);
