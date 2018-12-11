@@ -39,8 +39,8 @@ const drawPlayer = () => {
 const drawSVG = (svg) => {
     return new Path2D(svg);
 };
-let path0 = drawSVG("M420 140h60V80h-60V20h60M20 20h30v120M80 20H50M100 140V20h60v60h-50v10h10v10h10v10h10v10h10v10h10v10M240 140h-60V20h60m-30 60h-30M260 140V20h10v30h10v30h20v30h10v30h10V20M340 140V20h40v10h10v10h10v80h-10v10h-10v10z");
-let hintPath0 = drawSVG("M740 20h30v120m30-120h-30M660 140V20h60v120m-60-60h60M820 140V20h60v60h-50v10h10v10h10v10h10v10h10v10h10v10M580 140V20h10v30h10v30h20V50h10V20h10v120M900 20h60m-60 120h60M930 20v120M980 20v20h10v20h10v20h20v20h10v20h10v20m0-120v20h-10v20h-10v20m-40 60v-20h10v-20h10V80");
+let path0 = drawSVG("M100 140V20h60v60h-50v10h10v10h10v10h10v10h10v10h10v10M340 20h30v120m30-120h-30M260 140V20h10v30h10v30h20V50h10V20h10v120M20 140V20h60M50 80H20M180 20h60v120h-60zM420 20h60v120h-60z");
+let hintPath0 = drawSVG("M580 140h60V80h-60V20h60M660 20h30v120m30-120h-30M820 20h30v120m30-120h-30M1220 20h30v120m30-120h-30M960 140h-60V20h60m-30 60h-30M1120 140h-60V20h60m-30 60h-30M1140 140V20h10v30h10v30h20v30h10v30h10V20M740 140V20h60v120m-60-60h60M980 140V20h10v30h10v30h20V50h10V20h10v120");
 
 const drawHint = (hint) => {
     ctx.strokeStyle = "black";
@@ -183,9 +183,9 @@ const lifeMinus = () => {
 
 // set win condition
 const win = () => {
-    if (routes.length === 198) {
+    if (routes.length === 197) {
         alert("Congratulation! You pass the level!");
-        window.location.href = "statement.html";
+        window.location.href = "tutorial.html";
     }
 }
 
